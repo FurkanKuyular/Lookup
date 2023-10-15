@@ -14,7 +14,7 @@ class AddressResource extends JsonResource
     {
         return [
             'address' => $this->resource->address,
-            'post_cpde' => $this->resource->post_code,
+            'post_code' => $this->resource->post_code,
             'city_name' => $this->resource->city_name,
             'country_name' => $this->resource->country_name,
             'created_at' => $this->resource->created_at,
