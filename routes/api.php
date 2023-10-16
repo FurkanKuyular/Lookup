@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\PersonController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,8 +16,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::post('login', [UserController::class, 'login'])->name('login');
+
+Route::group(['middleware' => 'auth:sanctum'], function () {
+    Route::get('user', [UserController::class, 'getUser']);
+    Route::post('logout', [UserController::class, 'logout']);
 });
 
 Route::resource('person', PersonController::class)->only('index', 'store', 'update', 'destroy');
