@@ -2,6 +2,7 @@
 
 namespace App\Exceptions;
 
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\JsonResponse;
@@ -32,7 +33,12 @@ class Handler extends ExceptionHandler
             return $this->getThrottleRequestException($e);
         });
 
+        $this->renderable(function (AuthenticationException $e) {
+           return $this->getAuthenticationException($e);
+        });
+
         $this->renderable(function (Throwable $e) {
+            dd($e);
             return $this->getFailedOperationException($e);
         });
     }
@@ -62,5 +68,14 @@ class Handler extends ExceptionHandler
                 ],
             ],
         ], Response::HTTP_TOO_MANY_REQUESTS);
+    }
+
+    private function getAuthenticationException(AuthenticationException $e): JsonResponse
+    {
+        return response()->json([
+            'error' => [
+                'message' => $e->getMessage(),
+            ]
+        ], Response::HTTP_UNAUTHORIZED);
     }
 }
