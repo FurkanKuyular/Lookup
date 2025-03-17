@@ -5,10 +5,14 @@ namespace App\Listeners;
 use Carbon\Carbon;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\InteractsWithQueue;
 use OwenIt\Auditing\Models\Audit;
 
-class UserEventSubscriber
+class UserEventSubscriber implements ShouldQueue
 {
+    use InteractsWithQueue;
+
     public function handleUserLogin(Login $event)
     {
         Audit::query()->create([

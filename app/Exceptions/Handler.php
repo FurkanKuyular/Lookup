@@ -38,6 +38,7 @@ class Handler extends ExceptionHandler
         });
 
         $this->renderable(function (Throwable $e) {
+            dd($e);
             return $this->getFailedOperationException($e);
         });
     }

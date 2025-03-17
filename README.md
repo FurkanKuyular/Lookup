@@ -16,9 +16,11 @@ Open docker and run this command in project path ``` sail up ```
 
 You have to create your ``.env`` file or you can use direclty .env.example
 
-After ``.env`` configuration you must to run ``sail artisan migrate`` and check your database
+After ``.env`` configuration you must to run ``sail artisan migrate --seed`` and check your database
 
 You can import postman collection for BE features if you dont have postman you can install [here](https://www.postman.com) 
+
+Install npm ``sail npm install``
 
 And now for a last step you must to run ``sail npm run dev`` for FE.
 
