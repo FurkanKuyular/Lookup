@@ -28,18 +28,18 @@ class UserEventSubscriber implements ShouldQueue
         ]);
     }
 
-    public function handleUserLogout()
+    public function handleUserLogout(Logout $event)
     {
         Audit::query()->create([
-            'auditable_id' => auth()->user()->id,
-            'auditable_type' => "Logged In",
+            'auditable_id' => $event->user->id,
+            'auditable_type' => "Logged Out",
             'event'      => "Logged Out",
             'url'        => request()->fullUrl(),
             'ip_address' => request()->getClientIp(),
             'user_agent' => request()->userAgent(),
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
-            'user_id'    => auth()->user()->id,
+            'user_id'    => $event->user->id,
         ]);
     }
 
