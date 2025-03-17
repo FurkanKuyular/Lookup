@@ -23,6 +23,7 @@ services:
             - sail
         depends_on:
             - mysql
+            - rabbitmq
     mysql:
         image: 'mysql/mysql-server:8.0'
         ports:
@@ -56,6 +57,8 @@ services:
         ports:
             - '5672:5672'
             - '15672:15672'
+        networks:
+            - sail
     redis:
         image: 'redis:alpine'
         ports:

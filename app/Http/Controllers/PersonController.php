@@ -6,7 +6,6 @@ use App\Http\Requests\PersonCreateRequest;
 use App\Http\Requests\PersonUpdateRequest;
 use App\Http\Resources\PersonResource;
 use App\Models\Person;
-use http\Exception\RuntimeException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Cache;
@@ -19,7 +18,7 @@ class PersonController extends Controller
         $person = Person::query()->create($request->validated());
 
         if (!$person instanceof Person) {
-            throw new RuntimeException();
+            throw new \RuntimeException();
         }
 
         Cache::delete('persons');

@@ -7,7 +7,6 @@
     A problem occurred
   </v-snackbar>
 
-
   <v-row justify="center" class="mt-2">
     <v-dialog v-model="dialog" persistent width="1024">
       <template v-slot:activator="{ props }">
@@ -24,7 +23,12 @@
                 <v-text-field v-model="name" label="Name" required></v-text-field>
               </v-col>
               <v-col cols="12" sm="6" md="4">
-                <v-text-field type="date" v-model="birthday" label="Birthday" required></v-text-field>
+                <v-text-field
+                    v-model="formattedBirthday"
+                    label="Birthday"
+                    required
+                    @blur="updateBirthday"
+                ></v-text-field>
               </v-col>
               <v-col cols="12" sm="6" md="4">
                 <v-text-field :maxlength="1" :minlength="1" v-model="gender" label="Gender" required></v-text-field>
@@ -56,12 +60,18 @@
     </tr>
     </thead>
     <tbody>
-    <tr v-for="item in this.persons.data" :key="item.id">
+    <tr v-for="item in persons.data" :key="item.id">
       <td>
         <v-text-field class="mt-2" v-model="item.name" label="Name" required></v-text-field>
       </td>
       <td>
-        <v-text-field class="mt-2" v-model="item.birthday" type="date" label="Birthday" required></v-text-field>
+        <v-text-field
+            class="mt-2"
+            v-model="item.formattedBirthday"
+            label="Birthday"
+            required
+            @blur="updateItemBirthday(item)"
+        ></v-text-field>
       </td>
       <td>
         <v-text-field class="mt-2" :maxlength="1" :minlength="1" v-model="item.gender" label="Gender" required></v-text-field>
@@ -76,73 +86,102 @@
 </template>
 
 <script>
+import { ref, computed } from "vue";
+import { format, parse } from "date-fns";
+import axios from "axios";
+
 export default {
-  data: () => {
-    return {
-      id: null,
-      persons: [],
-      dialog: false,
-      name: null,
-      birthday: null,
-      gender: null,
-      success_notification: false,
-      error_notification: false,
+  data: () => ({
+    dialog: false,
+    name: null,
+    birthday: null,
+    gender: null,
+    success_notification: false,
+    error_notification: false,
+    persons: [],
+  }),
+  computed: {
+    formattedBirthday: {
+      get() {
+        return this.birthday ? format(new Date(this.birthday), "dd.MM.yyyy") : "";
+      },
+      set(value) {
+        const parsedDate = parse(value, "dd.MM.yyyy", new Date());
+        this.birthday = format(parsedDate, "yyyy-MM-dd");
+      }
     }
   },
   mounted() {
-    this.fetchPeople()
+    this.fetchPeople();
   },
   methods: {
     fetchPeople() {
-      axios.get('/api/person')
-          .then(response => this.persons = response.data)
-          .catch(error => console.log(error))
+      axios.get("/api/person")
+          .then(response => {
+            this.persons = response.data;
+            this.persons.data.forEach(person => {
+              person.formattedBirthday = format(new Date(person.birthday), "dd.MM.yyyy");
+            });
+          })
+          .catch(error => console.log(error));
+    },
+    updateBirthday() {
+      if (this.formattedBirthday) {
+        const parsedDate = parse(this.formattedBirthday, "dd.MM.yyyy", new Date());
+        this.birthday = format(parsedDate, "yyyy-MM-dd");
+      }
+    },
+    updateItemBirthday(item) {
+      if (item.formattedBirthday) {
+        const parsedDate = parse(item.formattedBirthday, "dd.MM.yyyy", new Date());
+        item.birthday = format(parsedDate, "yyyy-MM-dd");
+      }
     },
     create() {
-      axios.post('/api/person', {
+      axios.post("/api/person", {
         name: this.name,
         birthday: this.birthday,
         gender: this.gender,
       })
-          .then(() => function () {
+          .then(() => {
             this.success_notification = true;
+            this.fetchPeople();
+            this.dialog = false;
+            this.name = null;
+            this.birthday = null;
+            this.gender = null;
           })
-          .catch(error => function () {
+          .catch(error => {
             console.log(error);
             this.error_notification = true;
-          })
-
-      location.reload();
+          });
     },
     update(item) {
-      axios.put('/api/person/'+item.id, {
+      axios.put(`/api/person/${item.id}`, {
         name: item.name,
         birthday: item.birthday,
         gender: item.gender,
       })
-          .then(() => function () {
+          .then(() => {
             this.success_notification = true;
+            this.fetchPeople();
           })
-          .catch(error => function () {
+          .catch(error => {
             console.log(error);
             this.error_notification = true;
-          })
-
-      location.reload();
+          });
     },
     destroy(id) {
-      console.log(id);
-      axios.delete('/api/person/'+id)
-          .then(() => function () {
-            this.success.notification = true;
+      axios.delete(`/api/person/${id}`)
+          .then(() => {
+            this.success_notification = true;
+            this.fetchPeople();
           })
-          .catch(error => function () {
+          .catch(error => {
             console.log(error);
             this.error_notification = true;
-          })
-
-      location.reload();
+          });
     }
   },
-}
+};
 </script>
